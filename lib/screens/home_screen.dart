@@ -432,8 +432,17 @@ class _EntryList extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           IconButton(
-                            icon: const Icon(Icons.edit_outlined, color: Colors.blue),
+                            icon: const Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
                             onPressed: () => onEdit?.call(entry),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                            onPressed: () {
+                              HapticFeedback.lightImpact();
+                              provider.removeEntry(entry.id);
+                            },
+                            visualDensity: VisualDensity.compact,
                           ),
                         ],
                       ),
