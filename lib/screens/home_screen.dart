@@ -16,6 +16,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _amountController = TextEditingController();
   final FocusNode _amountFocusNode = FocusNode();
+  
+  // Unfocusable focus nodes for buttons to prevent keyboard from closing
+  final FocusNode _addButtonFocusNode = FocusNode(canRequestFocus: false, skipTraversal: true);
+  final FocusNode _calcButtonFocusNode = FocusNode(canRequestFocus: false, skipTraversal: true);
+
   double _selectedPercentage = 50.0;
   Payer _selectedPayer = Payer.poom;
   Payer? _filterPayer; // null means "All"
@@ -24,6 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _amountController.dispose();
     _amountFocusNode.dispose();
+    _addButtonFocusNode.dispose();
+    _calcButtonFocusNode.dispose();
     super.dispose();
   }
 
@@ -206,7 +213,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Ensure the bottom section moves up with the keyboard
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: const Text('PayMe', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -227,144 +233,145 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text('Who paid?', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.grey)),
-                  const SizedBox(height: 8),
-                  PayerToggle(
-                    selectedPayer: _selectedPayer,
-                    onPayerChanged: (payer) {
-                      HapticFeedback.selectionClick();
-                      setState(() => _selectedPayer = payer);
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text('Who paid?', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.grey)),
+            const SizedBox(height: 8),
+            PayerToggle(
+              selectedPayer: _selectedPayer,
+              onPayerChanged: (payer) {
+                HapticFeedback.selectionClick();
+                setState(() => _selectedPayer = payer);
+              },
+            ),
+            const SizedBox(height: 24),
+            const Text('Amount', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.grey)),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _amountController,
+              focusNode: _amountFocusNode,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(
+                hintText: '0.00',
+                prefixText: '฿ ',
+                filled: true,
+                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                suffixIcon: Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: IconButton(
+                    icon: const Icon(Icons.cancel, color: Colors.grey),
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      _amountController.clear();
                     },
                   ),
-                  const SizedBox(height: 24),
-                  const Text('Amount', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.grey)),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _amountController,
-                    focusNode: _amountFocusNode,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration(
-                      hintText: '0.00',
-                      prefixText: '฿ ',
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide.none,
-                      ),
-                      suffixIcon: Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: IconButton(
-                          icon: const Icon(Icons.cancel, color: Colors.grey),
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            _amountController.clear();
-                          },
-                        ),
-                      ),
-                    ),
-                    style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                    autofocus: true,
+                ),
+              ),
+              style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+              autofocus: true,
+            ),
+            const SizedBox(height: 32),
+            FilledButton.icon(
+              focusNode: _calcButtonFocusNode,
+              onPressed: _showResult,
+              icon: const Icon(Icons.account_balance_wallet_outlined),
+              label: const Text('Calculate Final Balance', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              style: FilledButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.secondary,
+                foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 32),
+            const Text('Recent Entries', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            const SizedBox(height: 12),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  FilterChip(
+                    label: const Text('All'),
+                    selected: _filterPayer == null,
+                    onSelected: (_) => setState(() => _filterPayer = null),
                   ),
-                  const SizedBox(height: 32),
-                  FilledButton.icon(
-                    onPressed: _showResult,
-                    icon: const Icon(Icons.account_balance_wallet_outlined),
-                    label: const Text('Calculate Final Balance', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.secondary,
-                      foregroundColor: Theme.of(context).colorScheme.onSecondary,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
+                  const SizedBox(width: 8),
+                  FilterChip(
+                    label: const Text('Poom'),
+                    selected: _filterPayer == Payer.poom,
+                    onSelected: (_) => setState(() => _filterPayer = Payer.poom),
                   ),
-                  const SizedBox(height: 32),
-                  const Text('Recent Entries', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                  const SizedBox(height: 12),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        FilterChip(
-                          label: const Text('All'),
-                          selected: _filterPayer == null,
-                          onSelected: (_) => setState(() => _filterPayer = null),
-                        ),
-                        const SizedBox(width: 8),
-                        FilterChip(
-                          label: const Text('Poom'),
-                          selected: _filterPayer == Payer.poom,
-                          onSelected: (_) => setState(() => _filterPayer = Payer.poom),
-                        ),
-                        const SizedBox(width: 8),
-                        FilterChip(
-                          label: const Text('Poy'),
-                          selected: _filterPayer == Payer.poy,
-                          onSelected: (_) => setState(() => _filterPayer = Payer.poy),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _EntryList(
-                    filter: _filterPayer,
-                    onEdit: _editEntry,
+                  const SizedBox(width: 8),
+                  FilterChip(
+                    label: const Text('Poy'),
+                    selected: _filterPayer == Payer.poy,
+                    onSelected: (_) => setState(() => _filterPayer = Payer.poy),
                   ),
                 ],
               ),
             ),
-          ),
-          // Wrap bottom section in SafeArea to handle home indicator and keyboard
-          SafeArea(
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
+            const SizedBox(height: 12),
+            _EntryList(
+              filter: _filterPayer,
+              onEdit: _editEntry,
+            ),
+            // Padding to ensure content isn't covered by bottomNavigationBar
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        // Use ViewInsets to push the navigation bar above the keyboard
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: SafeArea(
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, -5),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text('Split', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: Colors.grey)),
+                const SizedBox(height: 8),
+                PercentageSelector(
+                  selectedPercentage: _selectedPercentage,
+                  onPercentageChanged: (pct) {
+                    HapticFeedback.selectionClick();
+                    setState(() => _selectedPercentage = pct);
+                  },
+                ),
+                const SizedBox(height: 16),
+                FilledButton(
+                  focusNode: _addButtonFocusNode,
+                  onPressed: _addEntry,
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 4,
+                    shadowColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
                   ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text('Split', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: Colors.grey)),
-                  const SizedBox(height: 8),
-                  PercentageSelector(
-                    selectedPercentage: _selectedPercentage,
-                    onPercentageChanged: (pct) {
-                      HapticFeedback.selectionClick();
-                      setState(() => _selectedPercentage = pct);
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton(
-                    onPressed: _addEntry,
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      elevation: 4,
-                      shadowColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
-                    ),
-                    child: const Text('Add Entry', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  ),
-                ],
-              ),
+                  child: const Text('Add Entry', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
