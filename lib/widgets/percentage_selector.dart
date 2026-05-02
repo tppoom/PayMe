@@ -18,12 +18,12 @@ class PercentageSelector extends StatelessWidget {
 
   String _getLabel(double pct) {
     if (pct == 50.0) return '/2';
-    if (pct == 100.0) return '1';
+    if (pct == 100.0) return 'Full';
     if (pct == 25.0) return '/4';
     if ((pct - oneThird).abs() < 0.01) return '/3';
     if ((pct - twoThirds).abs() < 0.01) return '2/3';
     if (pct == 75.0) return '3/4';
-    return '${pct.toInt()}%';
+    return '${pct.toInt()}';
   }
 
   @override
@@ -44,7 +44,7 @@ class PercentageSelector extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: _PercentageButton(
-            label: '1',
+            label: 'Full',
             isSelected: selectedPercentage == 100.0,
             onTap: () => onPercentageChanged(100.0),
           ),
