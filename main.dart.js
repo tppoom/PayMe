@@ -82635,14 +82635,14 @@ $1(a){this.a.d.$1(a.ga2(a))},
 $S:516}
 A.yG.prototype={
 a4f(a){if(a===50)return"/2"
-if(a===100)return"1"
+if(a===100)return"Full"
 if(a===25)return"/4"
 if(Math.abs(a-33.333333333333336)<0.01)return"/3"
 if(Math.abs(a-66.66666666666667)<0.01)return"2/3"
 if(a===75)return"3/4"
-return""+B.c.h_(a)+"%"},
+return""+B.c.h_(a)},
 L(a){var s,r,q,p,o,n,m,l=this,k=null,j=B.b.is(B.kj,new A.a69(l)),i=l.c,h=A.qW(new A.D_("/2",i===50,new A.a6a(l),k))
-i=A.qW(new A.D_("1",i===100,new A.a6b(l),k))
+i=A.qW(new A.D_("Full",i===100,new A.a6b(l),k))
 if(j){s=A.J(a).ax
 r=s.d
 s=r==null?s.b:r}else{s=A.J(a).ax
