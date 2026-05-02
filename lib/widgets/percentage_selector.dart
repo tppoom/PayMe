@@ -10,21 +10,27 @@ class PercentageSelector extends StatelessWidget {
     required this.onPercentageChanged,
   });
 
-  static const List<double> secondaryPercentages = [25, 33.33, 66.66, 75];
+  // Use exact fractions for 1/3 and 2/3 to avoid rounding issues
+  static const double oneThird = 100 / 3;
+  static const double twoThirds = 200 / 3;
+
+  static const List<double> secondaryPercentages = [25, oneThird, twoThirds, 75];
 
   String _getLabel(double pct) {
     if (pct == 50.0) return '/2';
     if (pct == 100.0) return '1';
     if (pct == 25.0) return '/4';
-    if (pct == 33.33) return '/3';
-    if (pct == 66.66) return '2/3';
+    if ((pct - oneThird).abs() < 0.01) return '/3';
+    if ((pct - twoThirds).abs() < 0.01) return '2/3';
     if (pct == 75.0) return '3/4';
     return '${pct.toInt()}%';
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool isSecondarySelected = secondaryPercentages.contains(selectedPercentage);
+    // Check if the selected percentage is one of the secondary options
+    // Using a small epsilon comparison for floating point numbers
+    final bool isSecondarySelected = secondaryPercentages.any((p) => (p - selectedPercentage).abs() < 0.01);
 
     return Row(
       children: [
@@ -62,7 +68,10 @@ class PercentageSelector extends StatelessWidget {
               child: ButtonTheme(
                 alignedDropdown: true,
                 child: DropdownButton<double>(
-                  value: isSecondarySelected ? selectedPercentage : null,
+                  // If secondary is selected, we need to match the exact value from the list
+                  value: isSecondarySelected 
+                    ? secondaryPercentages.firstWhere((p) => (p - selectedPercentage).abs() < 0.01) 
+                    : null,
                   hint: Text(
                     'More',
                     style: TextStyle(
