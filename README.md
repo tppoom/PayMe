@@ -1,4 +1,4 @@
-# pay_me
+# PayMe
 
 A new Flutter project.
 

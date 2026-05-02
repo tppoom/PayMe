@@ -1,6 +1,6 @@
 {
-    "name": "pay_me",
-    "short_name": "pay_me",
+    "name": "PayMe",
+    "short_name": "PayMe",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

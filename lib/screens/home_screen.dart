@@ -171,28 +171,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                     autofocus: true,
                   ),
-                  const SizedBox(height: 24),
-                  const Text('Split Percentage (Others share)', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.grey)),
-                  const SizedBox(height: 8),
-                  PercentageSelector(
-                    selectedPercentage: _selectedPercentage,
-                    onPercentageChanged: (pct) {
-                      HapticFeedback.selectionClick();
-                      setState(() => _selectedPercentage = pct);
-                    },
+                  const SizedBox(height: 32),
+                  FilledButton.icon(
+                    onPressed: _showResult,
+                    icon: const Icon(Icons.account_balance_wallet_outlined),
+                    label: const Text('Calculate Final Balance', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      foregroundColor: Theme.of(context).colorScheme.onSecondary,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
                   ),
                   const SizedBox(height: 32),
-                  FilledButton(
-                    onPressed: _addEntry,
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      elevation: 4,
-                      shadowColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
-                    ),
-                    child: const Text('Add Entry', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  ),
-                  const SizedBox(height: 40),
                   const Text('Recent Entries', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                   const SizedBox(height: 12),
                   SingleChildScrollView(
@@ -226,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           Container(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
               boxShadow: [
@@ -237,15 +228,31 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            child: FilledButton(
-              onPressed: _showResult,
-              style: FilledButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.secondary,
-                foregroundColor: Theme.of(context).colorScheme.onSecondary,
-                minimumSize: const Size.fromHeight(60),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              ),
-              child: const Text('Calculate Balance', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text('Split %', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: Colors.grey)),
+                const SizedBox(height: 8),
+                PercentageSelector(
+                  selectedPercentage: _selectedPercentage,
+                  onPercentageChanged: (pct) {
+                    HapticFeedback.selectionClick();
+                    setState(() => _selectedPercentage = pct);
+                  },
+                ),
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed: _addEntry,
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    elevation: 4,
+                    shadowColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
+                  ),
+                  child: const Text('Add Entry', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                ),
+              ],
             ),
           ),
         ],
