@@ -184,6 +184,19 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.transparent,
+        actions: [
+          IconButton(
+            icon: Icon(
+              context.watch<ExpenseProvider>().themeMode == ThemeMode.dark
+                  ? Icons.light_mode
+                  : Icons.dark_mode,
+            ),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              context.read<ExpenseProvider>().toggleTheme();
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [

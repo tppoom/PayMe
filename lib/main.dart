@@ -18,27 +18,31 @@ class PayMeApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'PayMe',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.light,
+    return Consumer<ExpenseProvider>(
+      builder: (context, provider, _) => MaterialApp(
+        title: 'PayMe',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.pink,
+            brightness: Brightness.light,
+            surface: const Color(0xFFFFE4E1), // Baby Pink / Misty Rose
+          ),
+          scaffoldBackgroundColor: const Color(0xFFFFE4E1),
+          useMaterial3: true,
         ),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.dark,
-          surface: const Color(0xFF0A0A1A),
+        darkTheme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.blue,
+            brightness: Brightness.dark,
+            surface: const Color(0xFF0A0A1A),
+          ),
+          scaffoldBackgroundColor: const Color(0xFF0A0A1A),
+          useMaterial3: true,
         ),
-        scaffoldBackgroundColor: const Color(0xFF0A0A1A),
-        useMaterial3: true,
+        themeMode: provider.themeMode,
+        home: const HomeScreen(),
       ),
-      themeMode: ThemeMode.dark,
-      home: const HomeScreen(),
     );
   }
 }
