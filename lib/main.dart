@@ -24,13 +24,29 @@ class PayMeApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFFFF2C97), // Vibrant Pink
-            primary: const Color(0xFFFF2C97),
+            seedColor: const Color(0xFFE91E63), // More balanced, professional pink
+            primary: const Color(0xFFE91E63),
+            secondary: const Color(0xFFAD1457),
+            surface: const Color(0xFFFFF1F6), // Very soft pink background
             brightness: Brightness.light,
-            surface: const Color(0xFFFFB7CE), // Light Pink BG
           ),
-          scaffoldBackgroundColor: const Color(0xFFFFB7CE),
+          scaffoldBackgroundColor: const Color(0xFFFFF1F6),
           useMaterial3: true,
+          // Explicitly theme buttons to avoid default white/grey
+          segmentedButtonTheme: SegmentedButtonThemeData(
+            style: SegmentedButton.styleFrom(
+              selectedBackgroundColor: const Color(0xFFE91E63),
+              selectedForegroundColor: Colors.white,
+              backgroundColor: const Color(0xFFFFD1DC),
+              foregroundColor: const Color(0xFFAD1457),
+            ),
+          ),
+          filledButtonTheme: FilledButtonThemeData(
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFE91E63),
+              foregroundColor: Colors.white,
+            ),
+          ),
         ),
         darkTheme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
