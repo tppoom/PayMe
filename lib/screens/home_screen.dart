@@ -76,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 autofocus: true,
               ),
               const SizedBox(height: 24),
-              const Text('Split %', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+              const Text('Split', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
               const SizedBox(height: 8),
               PercentageSelector(
                 selectedPercentage: editPercentage,
@@ -206,6 +206,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Ensure the bottom section moves up with the keyboard
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: const Text('PayMe', style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
@@ -320,43 +322,46 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -5),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text('Split %', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: Colors.grey)),
-                const SizedBox(height: 8),
-                PercentageSelector(
-                  selectedPercentage: _selectedPercentage,
-                  onPercentageChanged: (pct) {
-                    HapticFeedback.selectionClick();
-                    setState(() => _selectedPercentage = pct);
-                  },
-                ),
-                const SizedBox(height: 16),
-                FilledButton(
-                  onPressed: _addEntry,
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 4,
-                    shadowColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
+          // Wrap bottom section in SafeArea to handle home indicator and keyboard
+          SafeArea(
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
                   ),
-                  child: const Text('Add Entry', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                ),
-              ],
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text('Split', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: Colors.grey)),
+                  const SizedBox(height: 8),
+                  PercentageSelector(
+                    selectedPercentage: _selectedPercentage,
+                    onPercentageChanged: (pct) {
+                      HapticFeedback.selectionClick();
+                      setState(() => _selectedPercentage = pct);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  FilledButton(
+                    onPressed: _addEntry,
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 4,
+                      shadowColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
+                    ),
+                    child: const Text('Add Entry', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -369,6 +374,18 @@ class _EntryList extends StatelessWidget {
   final Payer? filter;
   final Function(Entry)? onEdit;
   const _EntryList({this.filter, this.onEdit});
+
+  String _getFractionLabel(double pct) {
+    const double oneThird = 100 / 3;
+    const double twoThirds = 200 / 3;
+    if (pct == 50.0) return '/2';
+    if (pct == 100.0) return 'Full';
+    if (pct == 25.0) return '/4';
+    if ((pct - oneThird).abs() < 0.01) return '/3';
+    if ((pct - twoThirds).abs() < 0.01) return '2/3';
+    if (pct == 75.0) return '3/4';
+    return pct.toStringAsFixed(0);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -453,7 +470,7 @@ class _EntryList extends StatelessWidget {
                         '฿${entry.amount.toStringAsFixed(2)}',
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                       ),
-                      subtitle: Text('${entry.percentage}% split'),
+                      subtitle: Text(_getFractionLabel(entry.percentage)),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
