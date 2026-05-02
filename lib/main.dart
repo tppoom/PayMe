@@ -24,11 +24,12 @@ class PayMeApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFFFF8DA1), // Cuter Pink
+            seedColor: const Color(0xFFFF2C97), // Vibrant Pink
+            primary: const Color(0xFFFF2C97),
             brightness: Brightness.light,
-            surface: const Color(0xFFFFF0F3), // Soft Pink BG
+            surface: const Color(0xFFFFB7CE), // Light Pink BG
           ),
-          scaffoldBackgroundColor: const Color(0xFFFFF0F3),
+          scaffoldBackgroundColor: const Color(0xFFFFB7CE),
           useMaterial3: true,
         ),
         darkTheme: ThemeData(
