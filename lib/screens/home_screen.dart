@@ -15,17 +15,31 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _amountController = TextEditingController();
+  final FocusNode _amountFocusNode = FocusNode();
   double _selectedPercentage = 50.0;
   Payer _selectedPayer = Payer.poom;
   Payer? _filterPayer; // null means "All"
 
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _amountFocusNode.dispose();
+    super.dispose();
+  }
+
   void _addEntry() {
     HapticFeedback.mediumImpact();
     final String text = _amountController.text;
-    if (text.isEmpty) return;
+    if (text.isEmpty) {
+      _amountFocusNode.requestFocus();
+      return;
+    }
 
     final double? amount = double.tryParse(text);
-    if (amount == null || amount <= 0) return;
+    if (amount == null || amount <= 0) {
+      _amountFocusNode.requestFocus();
+      return;
+    }
 
     context.read<ExpenseProvider>().addEntry(
           amount,
@@ -34,6 +48,8 @@ class _HomeScreenState extends State<HomeScreen> {
         );
 
     _amountController.clear();
+    // Keep keyboard open and focused for next entry
+    _amountFocusNode.requestFocus();
   }
 
   void _editEntry(Entry entry) {
@@ -126,9 +142,9 @@ class _HomeScreenState extends State<HomeScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _TotalItem(label: 'Poom gets', amount: poomTotal, color: Colors.blue),
+                _TotalItem(label: 'Poom paid', amount: poomTotal, color: Colors.blue),
                 Container(width: 1, height: 40, color: Colors.grey[300]),
-                _TotalItem(label: 'Poy gets', amount: poyTotal, color: Colors.pink),
+                _TotalItem(label: 'Poy paid', amount: poyTotal, color: Colors.pink),
               ],
             ),
             const SizedBox(height: 32),
@@ -231,6 +247,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 8),
                   TextField(
                     controller: _amountController,
+                    focusNode: _amountFocusNode,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     decoration: InputDecoration(
                       hintText: '0.00',
