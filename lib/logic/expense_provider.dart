@@ -13,16 +13,27 @@ class ExpenseProvider with ChangeNotifier {
   ThemeMode get themeMode => _themeMode;
 
   double get balance {
-    double bal = 0;
+    return poomTotal - poyTotal;
+  }
+
+  double get poomTotal {
+    double total = 0;
     for (var entry in _entries) {
-      double portion = entry.amount * (entry.percentage / 100);
       if (entry.payer == Payer.poom) {
-        bal += portion;
-      } else {
-        bal -= portion;
+        total += entry.amount * (entry.percentage / 100);
       }
     }
-    return bal;
+    return total;
+  }
+
+  double get poyTotal {
+    double total = 0;
+    for (var entry in _entries) {
+      if (entry.payer == Payer.poy) {
+        total += entry.amount * (entry.percentage / 100);
+      }
+    }
+    return total;
   }
 
   ExpenseProvider() {

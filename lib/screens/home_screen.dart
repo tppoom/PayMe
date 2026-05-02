@@ -100,6 +100,8 @@ class _HomeScreenState extends State<HomeScreen> {
     HapticFeedback.heavyImpact();
     final provider = context.read<ExpenseProvider>();
     final balance = provider.balance;
+    final poomTotal = provider.poomTotal;
+    final poyTotal = provider.poyTotal;
 
     showModalBottomSheet(
       context: context,
@@ -121,6 +123,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _TotalItem(label: 'Poom gets', amount: poomTotal, color: Colors.blue),
+                Container(width: 1, height: 40, color: Colors.grey[300]),
+                _TotalItem(label: 'Poy gets', amount: poyTotal, color: Colors.pink),
+              ],
+            ),
+            const SizedBox(height: 32),
             Text(
               balance == 0
                   ? 'All settled!'
@@ -467,6 +478,39 @@ class _EntryList extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+class _TotalItem extends StatelessWidget {
+  final String label;
+  final double amount;
+  final Color color;
+
+  const _TotalItem({
+    required this.label,
+    required this.amount,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 14, color: Colors.grey),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '฿${amount.toStringAsFixed(2)}',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+      ],
     );
   }
 }

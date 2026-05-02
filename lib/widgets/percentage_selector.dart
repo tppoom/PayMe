@@ -12,6 +12,16 @@ class PercentageSelector extends StatelessWidget {
 
   static const List<double> secondaryPercentages = [25, 33.33, 66.66, 75];
 
+  String _getLabel(double pct) {
+    if (pct == 50.0) return '/2';
+    if (pct == 100.0) return '1';
+    if (pct == 25.0) return '/4';
+    if (pct == 33.33) return '/3';
+    if (pct == 66.66) return '2/3';
+    if (pct == 75.0) return '3/4';
+    return '${pct.toInt()}%';
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isSecondarySelected = secondaryPercentages.contains(selectedPercentage);
@@ -20,7 +30,7 @@ class PercentageSelector extends StatelessWidget {
       children: [
         Expanded(
           child: _PercentageButton(
-            label: '50%',
+            label: '/2',
             isSelected: selectedPercentage == 50.0,
             onTap: () => onPercentageChanged(50.0),
           ),
@@ -28,7 +38,7 @@ class PercentageSelector extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: _PercentageButton(
-            label: '100%',
+            label: '1',
             isSelected: selectedPercentage == 100.0,
             onTap: () => onPercentageChanged(100.0),
           ),
@@ -68,7 +78,7 @@ class PercentageSelector extends StatelessWidget {
                   items: secondaryPercentages.map((double value) {
                     return DropdownMenuItem<double>(
                       value: value,
-                      child: Text('${value == 33.33 || value == 66.66 ? value.toStringAsFixed(2) : value.toInt()}%'),
+                      child: Text(_getLabel(value)),
                     );
                   }).toList(),
                   onChanged: (double? newValue) {
@@ -115,7 +125,7 @@ class _PercentageButton extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 18,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             color: isSelected
                 ? Theme.of(context).colorScheme.onPrimaryContainer
