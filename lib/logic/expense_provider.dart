@@ -39,6 +39,22 @@ class ExpenseProvider with ChangeNotifier {
     await _saveEntries();
   }
 
+  Future<void> updateEntry(String id, double amount, double percentage) async {
+    final index = _entries.indexWhere((e) => e.id == id);
+    if (index != -1) {
+      final oldEntry = _entries[index];
+      _entries[index] = Entry(
+        id: oldEntry.id,
+        amount: amount,
+        percentage: percentage,
+        payer: oldEntry.payer,
+        timestamp: oldEntry.timestamp,
+      );
+      notifyListeners();
+      await _saveEntries();
+    }
+  }
+
   Future<void> removeEntry(String id) async {
     _entries.removeWhere((e) => e.id == id);
     notifyListeners();

@@ -36,6 +36,66 @@ class _HomeScreenState extends State<HomeScreen> {
     _amountController.clear();
   }
 
+  void _editEntry(Entry entry) {
+    final TextEditingController editAmountController =
+        TextEditingController(text: entry.amount.toString());
+    double editPercentage = entry.percentage;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text('Edit Entry (${entry.payer == Payer.poom ? 'Poom' : 'Poy'})'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: editAmountController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(
+                  labelText: 'Amount (฿)',
+                  border: OutlineInputBorder(),
+                ),
+                autofocus: true,
+              ),
+              const SizedBox(height: 24),
+              const Text('Split %', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+              const SizedBox(height: 8),
+              PercentageSelector(
+                selectedPercentage: editPercentage,
+                onPercentageChanged: (pct) {
+                  HapticFeedback.selectionClick();
+                  setDialogState(() => editPercentage = pct);
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final double? amount = double.tryParse(editAmountController.text);
+                if (amount != null && amount > 0) {
+                  context.read<ExpenseProvider>().updateEntry(
+                        entry.id,
+                        amount,
+                        editPercentage,
+                      );
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showResult() {
     HapticFeedback.heavyImpact();
     final provider = context.read<ExpenseProvider>();
@@ -211,7 +271,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _EntryList(filter: _filterPayer),
+                  _EntryList(
+                    filter: _filterPayer,
+                    onEdit: _editEntry,
+                  ),
                 ],
               ),
             ),
@@ -263,7 +326,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class _EntryList extends StatelessWidget {
   final Payer? filter;
-  const _EntryList({this.filter});
+  final Function(Entry)? onEdit;
+  const _EntryList({this.filter, this.onEdit});
 
   @override
   Widget build(BuildContext context) {
@@ -323,55 +387,56 @@ class _EntryList extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                  child: ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: entry.payer == Payer.poom 
-                            ? Theme.of(context).colorScheme.primaryContainer 
-                            : Theme.of(context).colorScheme.tertiaryContainer,
-                        borderRadius: BorderRadius.circular(12),
+                child: InkWell(
+                  onTap: () => onEdit?.call(entry),
+                  borderRadius: BorderRadius.circular(16),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                    child: ListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: entry.payer == Payer.poom 
+                              ? Theme.of(context).colorScheme.primaryContainer 
+                              : Theme.of(context).colorScheme.tertiaryContainer,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          entry.payer == Payer.poom ? Icons.person : Icons.person_outline,
+                          color: entry.payer == Payer.poom 
+                              ? Theme.of(context).colorScheme.onPrimaryContainer 
+                              : Theme.of(context).colorScheme.onTertiaryContainer,
+                        ),
                       ),
-                      child: Icon(
-                        entry.payer == Payer.poom ? Icons.person : Icons.person_outline,
-                        color: entry.payer == Payer.poom 
-                            ? Theme.of(context).colorScheme.onPrimaryContainer 
-                            : Theme.of(context).colorScheme.onTertiaryContainer,
+                      title: Text(
+                        '฿${entry.amount.toStringAsFixed(2)}',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                       ),
-                    ),
-                    title: Text(
-                      '฿${entry.amount.toStringAsFixed(2)}',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                    ),
-                    subtitle: Text('${entry.percentage}% split'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              entry.payer == Payer.poom ? 'Poom' : 'Poy',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.primary,
+                      subtitle: Text('${entry.percentage}% split'),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                entry.payer == Payer.poom ? 'Poom' : 'Poy',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
                               ),
-                            ),
-                            const Text('Paid', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                          ],
-                        ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline, color: Colors.grey),
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            provider.removeEntry(entry.id);
-                          },
-                        ),
-                      ],
+                              const Text('Paid', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                            ],
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.edit_outlined, color: Colors.blue),
+                            onPressed: () => onEdit?.call(entry),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
