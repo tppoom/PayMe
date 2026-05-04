@@ -259,37 +259,62 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 24),
                   const Text('Amount', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.grey)),
                   const SizedBox(height: 8),
-                  TextField(
-                    controller: _amountController,
-                    focusNode: _amountFocusNode,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: InputDecoration(
-                      hintText: '0.00',
-                      prefixText: '฿ ',
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide.none,
-                      ),
-                      suffixIcon: Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: IconButton(
-                          icon: const Icon(Icons.cancel, color: Colors.grey),
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            _amountController.clear();
-                            _amountFocusNode.requestFocus();
-                          },
+                  IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _amountController,
+                            focusNode: _amountFocusNode,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            onSubmitted: kIsWeb ? (_) => _addEntry() : null,
+                            decoration: InputDecoration(
+                              hintText: '0.00',
+                              prefixText: '฿ ',
+                              filled: true,
+                              fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide.none,
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                              suffixIcon: Padding(
+                                padding: const EdgeInsets.only(right: 4.0),
+                                child: IconButton(
+                                  icon: const Icon(Icons.cancel, color: Colors.grey, size: 20),
+                                  onPressed: () {
+                                    HapticFeedback.lightImpact();
+                                    _amountController.clear();
+                                    _amountFocusNode.requestFocus();
+                                  },
+                                ),
+                              ),
+                            ),
+                            style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                            autofocus: true,
+                          ),
                         ),
-                      ),
+                        if (kIsWeb) ...[
+                          const SizedBox(width: 12),
+                          AspectRatio(
+                            aspectRatio: 1,
+                            child: IconButton.filled(
+                              focusNode: _addButtonFocusNode,
+                              onPressed: _addEntry,
+                              icon: const Icon(Icons.add, size: 32),
+                              style: IconButton.styleFrom(
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
-                    style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                    autofocus: true,
                   ),
                   const SizedBox(height: 32),
                   
-                  // WEB ONLY: Move Split and Add btn here
+                  // WEB ONLY: Move Split here (Add btn now in Row above)
                   if (kIsWeb) ...[
                     const Text('Split', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: Colors.grey)),
                     const SizedBox(height: 8),
@@ -301,22 +326,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         _amountFocusNode.requestFocus(); // Keep focus
                       },
                     ),
-                    const SizedBox(height: 16),
-                    FilledButton(
-                      focusNode: _addButtonFocusNode,
-                      onPressed: _addEntry,
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 18),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        elevation: 4,
-                        shadowColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
-                      ),
-                      child: const Text('Add Entry', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24.0),
-                      child: Divider(thickness: 1),
-                    ),
+                    const SizedBox(height: 40),
                   ],
 
                   FilledButton.icon(
