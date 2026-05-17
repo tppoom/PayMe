@@ -50,6 +50,9 @@ class ExpenseProvider with ChangeNotifier {
       'no_entries': {'en': 'No entries yet', 'th': 'ยังไม่มีรายการ'},
       'no_entries_for': {'en': 'No entries for', 'th': 'ยังไม่มีรายการของ'},
       'full': {'en': 'Full', 'th': 'เต็ม'},
+      'more': {'en': 'More', 'th': 'เพิ่มเติม'},
+      'poom': {'en': 'Poom', 'th': 'ภูมิ'},
+      'poy': {'en': 'Poy', 'th': 'ปอย'},
     };
 
     return translations[key]?[isThai ? 'th' : 'en'] ?? key;

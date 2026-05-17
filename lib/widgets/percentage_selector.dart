@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../logic/expense_provider.dart';
 
 class PercentageSelector extends StatelessWidget {
   final double selectedPercentage;
@@ -16,9 +18,9 @@ class PercentageSelector extends StatelessWidget {
 
   static const List<double> secondaryPercentages = [25, oneThird, twoThirds, 75];
 
-  String _getLabel(double pct) {
+  String _getLabel(double pct, ExpenseProvider provider) {
     if (pct == 50.0) return '/2';
-    if (pct == 100.0) return 'Full';
+    if (pct == 100.0) return provider.translate('full');
     if (pct == 25.0) return '/4';
     if ((pct - oneThird).abs() < 0.01) return '/3';
     if ((pct - twoThirds).abs() < 0.01) return '2/3';
@@ -28,6 +30,7 @@ class PercentageSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.read<ExpenseProvider>();
     // Check if the selected percentage is one of the secondary options
     // Using a small epsilon comparison for floating point numbers
     final bool isSecondarySelected = secondaryPercentages.any((p) => (p - selectedPercentage).abs() < 0.01);
@@ -44,7 +47,7 @@ class PercentageSelector extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: _PercentageButton(
-            label: 'Full',
+            label: provider.translate('full'),
             isSelected: selectedPercentage == 100.0,
             onTap: () => onPercentageChanged(100.0),
           ),
@@ -73,7 +76,7 @@ class PercentageSelector extends StatelessWidget {
                     ? secondaryPercentages.firstWhere((p) => (p - selectedPercentage).abs() < 0.01) 
                     : null,
                   hint: Text(
-                    'More',
+                    provider.translate('more'),
                     style: TextStyle(
                       color: isSecondarySelected
                           ? Theme.of(context).colorScheme.onPrimaryContainer
@@ -87,7 +90,7 @@ class PercentageSelector extends StatelessWidget {
                   items: secondaryPercentages.map((double value) {
                     return DropdownMenuItem<double>(
                       value: value,
-                      child: Text(_getLabel(value)),
+                      child: Text(_getLabel(value, provider)),
                     );
                   }).toList(),
                   onChanged: (double? newValue) {

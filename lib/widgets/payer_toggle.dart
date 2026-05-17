@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/entry.dart';
+import '../logic/expense_provider.dart';
 
 class PayerToggle extends StatelessWidget {
   final Payer selectedPayer;
@@ -13,6 +15,7 @@ class PayerToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.read<ExpenseProvider>();
     return SizedBox(
       width: double.infinity,
       child: SegmentedButton<Payer>(
@@ -20,16 +23,16 @@ class PayerToggle extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 16),
           visualDensity: VisualDensity.comfortable,
         ),
-        segments: const [
+        segments: [
           ButtonSegment<Payer>(
             value: Payer.poom,
-            label: Text('Poom', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            icon: Icon(Icons.person),
+            label: Text(provider.translate('poom'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            icon: const Icon(Icons.person),
           ),
           ButtonSegment<Payer>(
             value: Payer.poy,
-            label: Text('Poy', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            icon: Icon(Icons.person_outline),
+            label: Text(provider.translate('poy'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            icon: const Icon(Icons.person_outline),
           ),
         ],
         selected: {selectedPayer},

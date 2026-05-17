@@ -71,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: Text('${provider.translate('edit_entry')} (${entry.payer == Payer.poom ? 'Poom' : 'Poy'})'),
+          title: Text('${provider.translate('edit_entry')} (${entry.payer == Payer.poom ? provider.translate('poom') : provider.translate('poy')})'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -358,13 +358,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(width: 8),
                         FilterChip(
-                          label: const Text('Poom'),
+                          label: Text(provider.translate('poom')),
                           selected: _filterPayer == Payer.poom,
                           onSelected: (_) => setState(() => _filterPayer = Payer.poom),
                         ),
                         const SizedBox(width: 8),
                         FilterChip(
-                          label: const Text('Poy'),
+                          label: Text(provider.translate('poy')),
                           selected: _filterPayer == Payer.poy,
                           onSelected: (_) => setState(() => _filterPayer = Payer.poy),
                         ),
@@ -541,7 +541,7 @@ class _EntryList extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(
-                                entry.payer == Payer.poom ? 'Poom' : 'Poy',
+                                entry.payer == Payer.poom ? provider.translate('poom') : provider.translate('poy'),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Theme.of(context).colorScheme.primary,
