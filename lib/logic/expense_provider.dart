@@ -6,11 +6,25 @@ import '../models/entry.dart';
 class ExpenseProvider with ChangeNotifier {
   List<Entry> _entries = [];
   static const String _storageKey = 'payme_entries';
-  static const String _themeKey = 'payme_theme';
-  ThemeMode _themeMode = ThemeMode.dark;
+  
+  Payer _currentPayer = Payer.poom;
+  Locale _locale = const Locale('en');
 
   List<Entry> get entries => _entries;
-  ThemeMode get themeMode => _themeMode;
+  Payer get currentPayer => _currentPayer;
+  Locale get locale => _locale;
+
+  ThemeMode get themeMode => _currentPayer == Payer.poom ? ThemeMode.dark : ThemeMode.light;
+
+  void setCurrentPayer(Payer payer) {
+    _currentPayer = payer;
+    notifyListeners();
+  }
+
+  void toggleLocale() {
+    _locale = _locale.languageCode == 'en' ? const Locale('th') : const Locale('en');
+    notifyListeners();
+  }
 
   double get balance {
     return poomTotal - poyTotal;
@@ -38,23 +52,6 @@ class ExpenseProvider with ChangeNotifier {
 
   ExpenseProvider() {
     loadEntries();
-    _loadTheme();
-  }
-
-  void toggleTheme() async {
-    _themeMode = _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
-    notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_themeKey, _themeMode.index);
-  }
-
-  Future<void> _loadTheme() async {
-    final prefs = await SharedPreferences.getInstance();
-    final int? themeIndex = prefs.getInt(_themeKey);
-    if (themeIndex != null) {
-      _themeMode = ThemeMode.values[themeIndex];
-      notifyListeners();
-    }
   }
 
   Future<void> addEntry(double amount, double percentage, Payer payer) async {

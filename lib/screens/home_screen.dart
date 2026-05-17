@@ -23,7 +23,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final FocusNode _calcButtonFocusNode = FocusNode(canRequestFocus: false, skipTraversal: true);
 
   double _selectedPercentage = 50.0;
-  Payer _selectedPayer = Payer.poom;
   Payer? _filterPayer; // null means "All"
 
   @override
@@ -50,10 +49,11 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    context.read<ExpenseProvider>().addEntry(
+    final provider = context.read<ExpenseProvider>();
+    provider.addEntry(
           amount,
           _selectedPercentage,
-          _selectedPayer,
+          provider.currentPayer,
         );
 
     _amountController.clear();
@@ -226,16 +226,15 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
         backgroundColor: Colors.transparent,
         actions: [
-          IconButton(
-            icon: Icon(
-              context.watch<ExpenseProvider>().themeMode == ThemeMode.dark
-                  ? Icons.light_mode
-                  : Icons.dark_mode,
-            ),
+          TextButton(
             onPressed: () {
               HapticFeedback.lightImpact();
-              context.read<ExpenseProvider>().toggleTheme();
+              context.read<ExpenseProvider>().toggleLocale();
             },
+            child: Text(
+              context.watch<ExpenseProvider>().locale.languageCode == 'en' ? 'TH' : 'EN',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -249,12 +248,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   const Text('Who paid?', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.grey)),
                   const SizedBox(height: 8),
-                  PayerToggle(
-                    selectedPayer: _selectedPayer,
-                    onPayerChanged: (payer) {
-                      HapticFeedback.selectionClick();
-                      setState(() => _selectedPayer = payer);
-                    },
+                  Consumer<ExpenseProvider>(
+                    builder: (context, provider, _) => PayerToggle(
+                      selectedPayer: provider.currentPayer,
+                      onPayerChanged: (payer) {
+                        HapticFeedback.selectionClick();
+                        provider.setCurrentPayer(payer);
+                      },
+                    ),
                   ),
                   const SizedBox(height: 24),
                   const Text('Amount', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.grey)),

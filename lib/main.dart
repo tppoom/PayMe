@@ -22,6 +22,7 @@ class PayMeApp extends StatelessWidget {
       builder: (context, provider, _) => MaterialApp(
         title: 'PayMe',
         debugShowCheckedModeBanner: false,
+        locale: provider.locale,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
             seedColor: const Color(0xFFE91E63), // More balanced, professional pink
