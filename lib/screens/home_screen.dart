@@ -62,6 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _editEntry(Entry entry) {
+    final provider = context.read<ExpenseProvider>();
     final TextEditingController editAmountController =
         TextEditingController(text: entry.amount.toString());
     double editPercentage = entry.percentage;
@@ -70,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: Text('Edit Entry (${entry.payer == Payer.poom ? 'Poom' : 'Poy'})'),
+          title: Text('${provider.translate('edit_entry')} (${entry.payer == Payer.poom ? 'Poom' : 'Poy'})'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -78,9 +79,9 @@ class _HomeScreenState extends State<HomeScreen> {
               TextField(
                 controller: editAmountController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(
-                  labelText: 'Amount (฿)',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: '${provider.translate('amount')} (฿)',
+                  border: const OutlineInputBorder(),
                 ),
                 autofocus: true,
               ),
@@ -99,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(provider.translate('cancel')),
             ),
             FilledButton(
               onPressed: () {
@@ -113,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Navigator.pop(context);
                 }
               },
-              child: const Text('Save'),
+              child: Text(provider.translate('save')),
             ),
           ],
         ),
@@ -151,18 +152,18 @@ class _HomeScreenState extends State<HomeScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _TotalItem(label: 'Poom paid', amount: poomTotal, color: Colors.blue),
+                _TotalItem(label: provider.translate('poom_paid'), amount: poomTotal, color: Colors.blue),
                 Container(width: 1, height: 40, color: Colors.grey[300]),
-                _TotalItem(label: 'Poy paid', amount: poyTotal, color: Colors.pink),
+                _TotalItem(label: provider.translate('poy_paid'), amount: poyTotal, color: Colors.pink),
               ],
             ),
             const SizedBox(height: 32),
             Text(
               balance == 0
-                  ? 'All settled!'
+                  ? provider.translate('all_settled')
                   : balance > 0
-                      ? 'Poy owes Poom'
-                      : 'Poom owes Poy',
+                      ? provider.translate('poy_owes_poom')
+                      : provider.translate('poom_owes_poy'),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
@@ -189,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       side: const BorderSide(color: Colors.red),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text('Reset All'),
+                    child: Text(provider.translate('reset_all')),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -200,7 +201,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text('Close'),
+                    child: Text(provider.translate('close')),
                   ),
                 ),
               ],
@@ -214,6 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<ExpenseProvider>();
     // The golden rule for keyboard-lifting layouts in Flutter:
     // Use a Column with an Expanded SingleChildScrollView for the top part
     // and a bottom Container for the actions. Scaffold(resizeToAvoidBottomInset: true)
@@ -246,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text('Who paid?', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.grey)),
+                  Text(provider.translate('who_paid'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.grey)),
                   const SizedBox(height: 8),
                   Consumer<ExpenseProvider>(
                     builder: (context, provider, _) => PayerToggle(
@@ -258,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const Text('Amount', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.grey)),
+                  Text(provider.translate('amount'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.grey)),
                   const SizedBox(height: 8),
                   IntrinsicHeight(
                     child: Row(
@@ -317,7 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   
                   // WEB ONLY: Move Split here (Add btn now in Row above)
                   if (kIsWeb) ...[
-                    const Text('Split', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: Colors.grey)),
+                    Text(provider.translate('split'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: Colors.grey)),
                     const SizedBox(height: 8),
                     PercentageSelector(
                       selectedPercentage: _selectedPercentage,
@@ -334,7 +336,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     focusNode: _calcButtonFocusNode,
                     onPressed: _showResult,
                     icon: const Icon(Icons.account_balance_wallet_outlined),
-                    label: const Text('Calculate Final Balance', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    label: Text(provider.translate('calc_balance'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     style: FilledButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.secondary,
                       foregroundColor: Theme.of(context).colorScheme.onSecondary,
@@ -343,14 +345,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  const Text('Recent Entries', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                  Text(provider.translate('recent_entries'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                   const SizedBox(height: 12),
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
                         FilterChip(
-                          label: const Text('All'),
+                          label: Text(provider.translate('all')),
                           selected: _filterPayer == null,
                           onSelected: (_) => setState(() => _filterPayer = null),
                         ),
@@ -398,7 +400,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text('Split', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: Colors.grey)),
+                    Text(provider.translate('split'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: Colors.grey)),
                     const SizedBox(height: 8),
                     PercentageSelector(
                       selectedPercentage: _selectedPercentage,
@@ -418,7 +420,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         elevation: 4,
                         shadowColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
                       ),
-                      child: const Text('Add Entry', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      child: Text(provider.translate('add_entry'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
@@ -435,11 +437,11 @@ class _EntryList extends StatelessWidget {
   final Function(Entry)? onEdit;
   const _EntryList({this.filter, this.onEdit});
 
-  String _getFractionLabel(double pct) {
+  String _getFractionLabel(double pct, ExpenseProvider provider) {
     const double oneThird = 100 / 3;
     const double twoThirds = 200 / 3;
     if (pct == 50.0) return '/2';
-    if (pct == 100.0) return 'Full';
+    if (pct == 100.0) return provider.translate('full');
     if (pct == 25.0) return '/4';
     if ((pct - oneThird).abs() < 0.01) return '/3';
     if ((pct - twoThirds).abs() < 0.01) return '2/3';
@@ -468,7 +470,7 @@ class _EntryList extends StatelessWidget {
                 const Icon(Icons.receipt_long_outlined, size: 48, color: Colors.grey),
                 const SizedBox(height: 12),
                 Text(
-                  filter == null ? 'No entries yet' : 'No entries for ${filter == Payer.poom ? 'Poom' : 'Poy'}',
+                  filter == null ? provider.translate('no_entries') : '${provider.translate('no_entries_for')} ${filter == Payer.poom ? 'Poom' : 'Poy'}',
                   style: const TextStyle(color: Colors.grey),
                 ),
               ],
@@ -530,7 +532,7 @@ class _EntryList extends StatelessWidget {
                         '฿${entry.amount.toStringAsFixed(2)}',
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                       ),
-                      subtitle: Text(_getFractionLabel(entry.percentage)),
+                      subtitle: Text(_getFractionLabel(entry.percentage, provider)),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -545,7 +547,7 @@ class _EntryList extends StatelessWidget {
                                   color: Theme.of(context).colorScheme.primary,
                                 ),
                               ),
-                              const Text('Paid', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                              Text(provider.translate('paid'), style: const TextStyle(fontSize: 12, color: Colors.grey)),
                             ],
                           ),
                           const SizedBox(width: 8),

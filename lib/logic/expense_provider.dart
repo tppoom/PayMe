@@ -26,6 +26,35 @@ class ExpenseProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  String translate(String key) {
+    final bool isThai = _locale.languageCode == 'th';
+    final Map<String, Map<String, String>> translations = {
+      'who_paid': {'en': 'Who paid?', 'th': 'ใครจ่าย?'},
+      'amount': {'en': 'Amount', 'th': 'จำนวนเงิน'},
+      'split': {'en': 'Split', 'th': 'หาร'},
+      'add_entry': {'en': 'Add Entry', 'th': 'เพิ่มรายการ'},
+      'recent_entries': {'en': 'Recent Entries', 'th': 'รายการล่าสุด'},
+      'all': {'en': 'All', 'th': 'ทั้งหมด'},
+      'calc_balance': {'en': 'Calculate Final Balance', 'th': 'คำนวณยอดสุทธิ'},
+      'poom_paid': {'en': 'Poom paid', 'th': 'ภูมิจ่าย'},
+      'poy_paid': {'en': 'Poy paid', 'th': 'ปอยจ่าย'},
+      'poy_owes_poom': {'en': 'Poy owes Poom', 'th': 'ปอยติดภูมิ'},
+      'poom_owes_poy': {'en': 'Poom owes Poy', 'th': 'ภูมิติดปอย'},
+      'all_settled': {'en': 'All settled!', 'th': 'เจ๊ากันแล้ว!'},
+      'reset_all': {'en': 'Reset All', 'th': 'ล้างทั้งหมด'},
+      'close': {'en': 'Close', 'th': 'ปิด'},
+      'cancel': {'en': 'Cancel', 'th': 'ยกเลิก'},
+      'save': {'en': 'Save', 'th': 'บันทึก'},
+      'edit_entry': {'en': 'Edit Entry', 'th': 'แก้ไขรายการ'},
+      'paid': {'en': 'Paid', 'th': 'จ่าย'},
+      'no_entries': {'en': 'No entries yet', 'th': 'ยังไม่มีรายการ'},
+      'no_entries_for': {'en': 'No entries for', 'th': 'ยังไม่มีรายการของ'},
+      'full': {'en': 'Full', 'th': 'เต็ม'},
+    };
+
+    return translations[key]?[isThai ? 'th' : 'en'] ?? key;
+  }
+
   double get balance {
     return poomTotal - poyTotal;
   }

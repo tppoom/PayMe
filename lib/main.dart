@@ -23,6 +23,10 @@ class PayMeApp extends StatelessWidget {
         title: 'PayMe',
         debugShowCheckedModeBanner: false,
         locale: provider.locale,
+        supportedLocales: const [
+          Locale('en'),
+          Locale('th'),
+        ],
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
             seedColor: const Color(0xFFE91E63), // More balanced, professional pink
