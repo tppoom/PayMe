@@ -86,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 autofocus: true,
               ),
               const SizedBox(height: 24),
-              const Text('Split', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+              Text(provider.translate('split'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
               const SizedBox(height: 8),
               PercentageSelector(
                 selectedPercentage: editPercentage,
@@ -216,10 +216,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ExpenseProvider>();
-    // The golden rule for keyboard-lifting layouts in Flutter:
-    // Use a Column with an Expanded SingleChildScrollView for the top part
-    // and a bottom Container for the actions. Scaffold(resizeToAvoidBottomInset: true)
-    // will handle the rest perfectly on all platforms.
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -234,7 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
               context.read<ExpenseProvider>().toggleLocale();
             },
             child: Text(
-              context.watch<ExpenseProvider>().locale.languageCode == 'en' ? 'TH' : 'EN',
+              provider.locale.languageCode == 'en' ? 'TH' : 'EN',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
@@ -250,14 +246,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Text(provider.translate('who_paid'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.grey)),
                   const SizedBox(height: 8),
-                  Consumer<ExpenseProvider>(
-                    builder: (context, provider, _) => PayerToggle(
-                      selectedPayer: provider.currentPayer,
-                      onPayerChanged: (payer) {
-                        HapticFeedback.selectionClick();
-                        provider.setCurrentPayer(payer);
-                      },
-                    ),
+                  PayerToggle(
+                    selectedPayer: provider.currentPayer,
+                    onPayerChanged: (payer) {
+                      HapticFeedback.selectionClick();
+                      provider.setCurrentPayer(payer);
+                    },
                   ),
                   const SizedBox(height: 24),
                   Text(provider.translate('amount'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.grey)),
@@ -317,7 +311,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 32),
                   
-                  // WEB ONLY: Move Split here (Add btn now in Row above)
                   if (kIsWeb) ...[
                     Text(provider.translate('split'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: Colors.grey)),
                     const SizedBox(height: 8),
@@ -326,7 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPercentageChanged: (pct) {
                         HapticFeedback.selectionClick();
                         setState(() => _selectedPercentage = pct);
-                        _amountFocusNode.requestFocus(); // Keep focus
+                        _amountFocusNode.requestFocus();
                       },
                     ),
                     const SizedBox(height: 40),
@@ -381,7 +374,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          // MOBILE ONLY: Fixed bottom bar inside the BODY (lifts with keyboard automatically)
           if (!kIsWeb)
             SafeArea(
               child: Container(
@@ -407,7 +399,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       onPercentageChanged: (pct) {
                         HapticFeedback.selectionClick();
                         setState(() => _selectedPercentage = pct);
-                        _amountFocusNode.requestFocus(); // Keep focus
+                        _amountFocusNode.requestFocus();
                       },
                     ),
                     const SizedBox(height: 16),
@@ -451,127 +443,126 @@ class _EntryList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ExpenseProvider>(
-      builder: (context, provider, child) {
-        final entries = filter == null
-            ? provider.entries
-            : provider.entries.where((e) => e.payer == filter).toList();
+    final provider = context.watch<ExpenseProvider>();
+    final entries = filter == null
+        ? provider.entries
+        : provider.entries.where((e) => e.payer == filter).toList();
 
-        if (entries.isEmpty) {
-          return Container(
-            padding: const EdgeInsets.symmetric(vertical: 40),
+    if (entries.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 40),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Theme.of(context).colorScheme.surfaceContainerHighest),
+        ),
+        child: Column(
+          children: [
+            const Icon(Icons.receipt_long_outlined, size: 48, color: Colors.grey),
+            const SizedBox(height: 12),
+            Text(
+              filter == null 
+                  ? provider.translate('no_entries') 
+                  : '${provider.translate('no_entries_for')} ${filter == Payer.poom ? provider.translate('poom') : provider.translate('poy')}',
+              style: const TextStyle(color: Colors.grey),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: entries.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final entry = entries[index];
+        return Dismissible(
+          key: Key(entry.id),
+          direction: DismissDirection.endToStart,
+          background: Container(
+            alignment: Alignment.centerRight,
+            padding: const EdgeInsets.only(right: 20),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
+              color: Colors.red.withValues(alpha: 0.9),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Theme.of(context).colorScheme.surfaceContainerHighest),
             ),
-            child: Column(
-              children: [
-                const Icon(Icons.receipt_long_outlined, size: 48, color: Colors.grey),
-                const SizedBox(height: 12),
-                Text(
-                  filter == null ? provider.translate('no_entries') : '${provider.translate('no_entries_for')} ${filter == Payer.poom ? 'Poom' : 'Poy'}',
-                  style: const TextStyle(color: Colors.grey),
-                ),
-              ],
+            child: const Icon(Icons.delete_outline, color: Colors.white, size: 28),
+          ),
+          onDismissed: (_) {
+            HapticFeedback.mediumImpact();
+            provider.removeEntry(entry.id);
+          },
+          child: Card(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
             ),
-          );
-        }
-
-        return ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: entries.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 12),
-          itemBuilder: (context, index) {
-            final entry = entries[index];
-            return Dismissible(
-              key: Key(entry.id),
-              direction: DismissDirection.endToStart,
-              background: Container(
-                alignment: Alignment.centerRight,
-                padding: const EdgeInsets.only(right: 20),
-                decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.9),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Icon(Icons.delete_outline, color: Colors.white, size: 28),
-              ),
-              onDismissed: (_) {
-                HapticFeedback.mediumImpact();
-                provider.removeEntry(entry.id);
-              },
-              child: Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
-                ),
-                child: InkWell(
-                  onTap: () => onEdit?.call(entry),
-                  borderRadius: BorderRadius.circular(16),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                    child: ListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: entry.payer == Payer.poom 
-                              ? Theme.of(context).colorScheme.primaryContainer 
-                              : Theme.of(context).colorScheme.tertiaryContainer,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          entry.payer == Payer.poom ? Icons.person : Icons.person_outline,
-                          color: entry.payer == Payer.poom 
-                              ? Theme.of(context).colorScheme.onPrimaryContainer 
-                              : Theme.of(context).colorScheme.onTertiaryContainer,
-                        ),
-                      ),
-                      title: Text(
-                        '฿${entry.amount.toStringAsFixed(2)}',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                      ),
-                      subtitle: Text(_getFractionLabel(entry.percentage, provider)),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
+            child: InkWell(
+              onTap: () => onEdit?.call(entry),
+              borderRadius: BorderRadius.circular(16),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                child: ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: entry.payer == Payer.poom 
+                          ? Theme.of(context).colorScheme.primaryContainer 
+                          : Theme.of(context).colorScheme.tertiaryContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      entry.payer == Payer.poom ? Icons.person : Icons.person_outline,
+                      color: entry.payer == Payer.poom 
+                          ? Theme.of(context).colorScheme.onPrimaryContainer 
+                          : Theme.of(context).colorScheme.onTertiaryContainer,
+                    ),
+                  ),
+                  title: Text(
+                    '฿${entry.amount.toStringAsFixed(2)}',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                  subtitle: Text(_getFractionLabel(entry.percentage, provider)),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                entry.payer == Payer.poom ? provider.translate('poom') : provider.translate('poy'),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ),
-                              Text(provider.translate('paid'), style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                            ],
+                          Text(
+                            entry.payer == Payer.poom ? provider.translate('poom') : provider.translate('poy'),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                           ),
-                          const SizedBox(width: 8),
-                          IconButton(
-                            icon: const Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
-                            onPressed: () => onEdit?.call(entry),
-                            visualDensity: VisualDensity.compact,
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
-                            onPressed: () {
-                              HapticFeedback.lightImpact();
-                              provider.removeEntry(entry.id);
-                            },
-                            visualDensity: VisualDensity.compact,
-                          ),
+                          Text(provider.translate('paid'), style: const TextStyle(fontSize: 12, color: Colors.grey)),
                         ],
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
+                        onPressed: () => onEdit?.call(entry),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          provider.removeEntry(entry.id);
+                        },
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ],
                   ),
                 ),
               ),
-            );
-          },
+            ),
+          ),
         );
       },
     );

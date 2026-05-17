@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'logic/expense_provider.dart';
 import 'screens/home_screen.dart';
@@ -26,6 +27,11 @@ class PayMeApp extends StatelessWidget {
         supportedLocales: const [
           Locale('en'),
           Locale('th'),
+        ],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
         ],
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
